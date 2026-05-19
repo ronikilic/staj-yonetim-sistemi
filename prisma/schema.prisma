@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Student {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  value     Json
+
+  @@map("students")
+}
+
+model School {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  value     Json
+
+  @@map("schools")
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  value     Json
+
+  @@map("companies")
+}
+
+model UploadedFile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  value     Json
+
+  @@map("uploaded_files")
+}
+
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  value     Json
+
+  @@map("logs")
+}
+
+
+model ConvertedHtml {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  value     Json
+
+  @@map("converted_html")
+}
