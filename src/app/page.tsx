@@ -1,9 +1,5 @@
-import Button from "../components/Button";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="p-10">
-      <Button text="Sistem Çalışıyor 🚀" />
-    </div>
-  );
+  redirect("/dashboard");
 }

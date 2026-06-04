@@ -92,7 +92,7 @@ export async function POST(request: Request) {
           originalFileName: value.originalName,
           fileId,
           html: converted.value,
-          messages: converted.messages,
+          messages: JSON.parse(JSON.stringify(converted.messages)),
         },
       },
     });

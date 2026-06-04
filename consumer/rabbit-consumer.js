@@ -4,7 +4,10 @@ const QUEUE_NAME = "system_logs";
 
 async function startConsumer() {
   try {
-    const connection = await amqp.connect("amqp://admin:1234@localhost:5672");
+    const connection = await amqp.connect(
+      process.env.RABBITMQ_URL || "amqp://admin:1234@localhost:5672"
+    );
+
     const channel = await connection.createChannel();
 
     await channel.assertQueue(QUEUE_NAME);
@@ -13,7 +16,7 @@ async function startConsumer() {
     console.log("Mesaj bekleniyor...");
 
     channel.consume(QUEUE_NAME, (message) => {
-      if (message !== null) {
+      if (message) {
         const data = JSON.parse(message.content.toString());
 
         console.log("Yeni mesaj alındı:");
@@ -23,7 +26,11 @@ async function startConsumer() {
       }
     });
   } catch (error) {
-    console.error("Consumer hatası:", error);
+    console.log("RabbitMQ hazır değil. 5 saniye sonra tekrar denenecek...");
+
+    setTimeout(() => {
+      startConsumer();
+    }, 5000);
   }
 }
 

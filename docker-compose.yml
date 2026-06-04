@@ -1,46 +1,77 @@
-version: "3.9"
-
 services:
 
-  postgres:
-    image: postgres:17
-    container_name: staj_postgres
-
+  frontend:
+    build: .
+    container_name: staj_frontend
     restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:1234@database:5432/staj_sistemi?schema=public"
+      RABBITMQ_URL: "amqp://admin:1234@rabbitmq:5672"
+      REDIS_URL: "redis://redis:6379"
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - app_uploads:/app/uploads
 
+  consumer:
+    build: .
+    container_name: staj_consumer
+    restart: always
+    command: node consumer/rabbit-consumer.js
+    environment:
+      RABBITMQ_URL: "amqp://admin:1234@rabbitmq:5672"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  database:
+    image: postgres:17
+    container_name: staj_database
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: staj_sistemi
-
     ports:
       - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d staj_sistemi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:latest
     container_name: staj_redis
-
     restart: always
-
     ports:
       - "6379:6379"
 
   rabbitmq:
     image: rabbitmq:3-management
     container_name: staj_rabbitmq
-
     restart: always
-
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: 1234
-
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:
+  app_uploads:
